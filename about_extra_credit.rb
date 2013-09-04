@@ -29,7 +29,7 @@ class GreedGame
 		rolls -= (values.count(1) + values.count(5))
 		triple_found = false
 		[2,3,4,6].each do |number| 
-			if values.count(number) == 3 
+			if values.count(number) >= 3 
 				triple_found = true
 				rolls -= 3 
 				break
@@ -72,6 +72,12 @@ class GreedGame
 				puts "Roll: #{roll_values}" 
 				puts "You scored #{score}"
 				puts "Your total score this turn is #{total_turn_score}"
+
+				if current_points+total_turn_score >=3000 
+					in_turn = false
+					next
+				end
+
 				puts "You can roll again with #{available_dice} dice"
 				puts "Would you like to roll the non-scoring dice (Yes/No)?"			
 				valid = false
@@ -128,13 +134,28 @@ class GreedGame
 		while (game_on)
 			@players.each_with_index do |player, index|
 				puts "Player #{index+1}'s' turn"
+				puts "Player #{index+1}',  are you ready to roll (Yes/No)?"
+				ready = false
+				answer = ""
+				
+				while (answer.upcase != "YES") 
+					answer = ""
+					while (!valid_answer?(answer))
+						answer = get_answer
+					end
+					#ready = valid_answer?(answer)
+				end
+
 				@players[index] = turn(player) 
 				if @players[index] >= 3000
 					game_on = false
 					winner = index + 1
 					break
 				end
-				puts "Player #{index+1} Total Score: #{@players[index]}"
+				#puts "Player #{index+1} Total Score: #{@players[index]}"
+				puts "******  SCOREBOARD  ******"
+				@players.each_with_index {|a, b| puts "Player #{b+1} Total Score: #{@players[b]}" }
+				puts "**************************"
 			end
 		end
 		puts @players
@@ -164,6 +185,7 @@ class GreedGameProject < Neo::Koan
 		assert_equal 1, test_game.count_non_scoring_dice([3,1,3,2,3])
 		assert_equal 4, test_game.count_non_scoring_dice([2,3,5,6,4])
 		assert_equal 3, test_game.count_non_scoring_dice([1,3,3,5,4])
+		assert_equal 2, test_game.count_non_scoring_dice([6,6,2,6,6])
 	end
 
 	def test_roll
@@ -205,13 +227,11 @@ class GreedGameProject < Neo::Koan
 
 
 
-
 	end
 
 
 
 game = GreedGame.new(2)
-#game.turn(0)
 game.play_greed
 
 
